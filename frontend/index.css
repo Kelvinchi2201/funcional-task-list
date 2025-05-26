@@ -198,6 +198,19 @@ body {
 	font-size: 2rem;
 	font-weight: 700;
 } 
+#notification-title{
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.notification-success{
+  background-color: green;
+}
+
+.notification-error{
+  background-color: red;
+}
 
 
 
