@@ -29,31 +29,31 @@ const todoCount = () => {
 	completeCount();
 	incompletedCount();
 };
-// Validaciones
+
 let isInputTaskValid = false;
 
-// Expresiones regulares 
+ 
 const TASK_REGEX = /^[A-Za-z][A-Za-z\s]{0,99}$/;
 
  
-// Funciones 
+ 
 
-// Valido si el texto del input es valido, antes de renderizarlo
+
 const renderInputValidationStatus = (input) => {
     const formErrorText = input.nextElementSibling;
     
     if (inputTask.value === '') {
-      // No mostrar el texto de ayuda.
+      
       input.classList.add('input-invalid');
       input.classList.remove('input-valid');
       formErrorText?.classList.add('show-error-text');      
     } else if (isInputTaskValid) {
-      // Ponerse verde y ocultar el texto de ayuda.
+      
       input.classList.add('input-valid');
       input.classList.remove('input-invalid');
       formErrorText?.classList.remove('show-error-text');
     } else {
-      // Ponerse rojo y mostrar el texto de ayuda.
+      
       input.classList.add('input-invalid');
       input.classList.remove('input-valid');
       formErrorText?.classList.add('show-error-text');
@@ -68,15 +68,15 @@ const renderFormBtnValidationStatus = () => {
     }
 }
   
-  // Eventos
+  
 inputTask.addEventListener('input', e => {
    isInputTaskValid = TASK_REGEX.test(inputTask.value);
    renderInputValidationStatus(inputTask, isInputTaskValid);
    renderFormBtnValidationStatus();
 });
 
-// Agrega una nueva tarea
-form.addEventListener('submit', e => {
+
+form.addEventListener('submit', async e => {
   e.preventDefault();
   const newTask = {
     id: crypto.randomUUID(),
@@ -84,32 +84,30 @@ form.addEventListener('submit', e => {
     isChecked: false
   }
   inputTask.value = '';
-  TaskModule.addTask(newTask);
+  await TaskModule.addTask(newTask);
   TaskModule.saveTaskInBrowser();
   TaskModule.renderTasks(taskList);
   todoCount();
 });
 
-// Escuchar el evento click 
-taskList.addEventListener('click', e => {
+
+taskList.addEventListener('click', async e => {
   const deleteBtn = e.target.closest('.task-delete-btn');
   const checkedBtn = e.target.closest('.task-check-btn');
 
   if (deleteBtn) {
     const li = deleteBtn.parentElement;
-    TaskModule.removeTask(li.id);
-    TaskModule.saveTaskInBrowser();
+    await TaskModule.removeTask(li.id);
     TaskModule.renderTasks(taskList);
-    todoCount();
   }
 
   if (checkedBtn) {
-      // Obtener el id de la tarea
+      
       const li = checkedBtn.parentElement;
-      // Obtener el input
+      
       const taskInputText = li.querySelector('p');        
       const status = li.getAttribute('status');
-      
+  
       if (status === 'disabled-inputs') {
       // Cambio el estado del input 
         li.setAttribute('status', 'enabled-inputs');
@@ -126,10 +124,8 @@ taskList.addEventListener('click', e => {
         }
 
         // La guardo en el navegador  
-        TaskModule.updateTask(checkedTask);
-        TaskModule.saveTaskInBrowser();
+        await TaskModule.updateTask(checkedTask);
         TaskModule.renderTasks(taskList);
-        todoCount();
       }
   
       if (status === 'enabled-inputs') {
@@ -149,10 +145,8 @@ taskList.addEventListener('click', e => {
         }
 
         // La guardo en el navegador
-        TaskModule.updateTask(checkedTask);
-        TaskModule.saveTaskInBrowser();
-        TaskModule.renderTasks(taskList);
-        todoCount();      
+        await TaskModule.updateTask(checkedTask);
+        TaskModule.renderTasks(taskList);      
       }
     }
 });
@@ -160,8 +154,10 @@ taskList.addEventListener('click', e => {
 
 
 
-window.onload = () => {
-  TaskModule.getTasksFromBrowser();
+window.onload = async () => {
+  
+  await TaskModule.getTaskFromDb();
   TaskModule.renderTasks(taskList);
+
   todoCount();
 }

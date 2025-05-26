@@ -1,3 +1,5 @@
+import { createNotification } from "./notification.js";
+
 /** 
   * @typedef Task
   * @type {object}
@@ -5,7 +7,7 @@
   * @property {string} Task Contenido de la tarea 
   * @property {boolean} isChecked Status si la tarea ha sido completada
 */
-
+const BASE_URL = 'http://localhost:3000/tasks';
 /** @type {Task[]} */
 let tasks = [];
  
@@ -13,9 +15,35 @@ let tasks = [];
  * Agrega una tarea al array de tareas
  * @param {Task} newTask
  */
-const addTask = (newTask) => {
-  tasks = tasks.concat(newTask);
-}
+
+  const addTask = async (taskToCreate) => {
+  try {
+    const taskToCreateJson = JSON.stringify(taskToCreate);
+    const response = await fetch (BASE_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type" : "application/json"
+      },
+      body: taskToCreateJson
+    });
+    const taskToCreated = await response.json();
+    tasks = tasks.concat(taskToCreated);
+    updateCounters();
+    createNotification({
+      titles: 'Nueva tarea creada',
+      description: '',
+      type: 'success'
+    })
+  } catch (error) {
+    console.log(error);
+    createNotification({
+      titles: 'Error',
+      description: 'El servidor no esta corriendo',
+      type: 'error'
+    })
+  }
+};
+
 
 // Icons
 const checkIcon = `
@@ -90,6 +118,25 @@ const saveTaskInBrowser = () => {
   localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
+const getTaskFromDb = async () => {
+  try {
+    const response = await fetch (BASE_URL, {method: "GET"});
+    const data = await response.json();
+    tasks = data;
+    updateCounters();
+  } catch (error) {
+    console.log(error);
+    if (error.message === 'Failed to fetch') {
+      console.log('1');
+      createNotification({
+        titles: 'Error',
+        description: 'El servidor no esta corriendo',
+        type: 'error'
+      });  
+    }
+  }
+}
+
 
 /**
  * Obtener las tareas del navegador y guardarlos en el array.
@@ -107,19 +154,45 @@ const getTasksFromBrowser = () => {
  * Elimina un contacto del array de tareas
  * @param {string} id El id del tareas a eliminar
  */
-const removeTask = (id) => {
+const removeTask = async (id) => {
+  const url = `${BASE_URL}/${id}`;
+  const response = await fetch (url, {method: 'DELETE'});
+  const taskDeleted = await response.json();
   tasks = tasks.filter(task => task.id !== id);
+  updateCounters();
+  createNotification({
+    titles: 'Tarea eliminada',
+    description: ``,
+    type:'error'
+  });
 }
 
 /**
  * Actualizar una tarea
  * @param {Task} updateTask tarea chequeada
 */
-const updateTask = (updateTask) => {
-  tasks = tasks.map(task => 
-    task.id === updateTask.id ? {...task, isChecked: updateTask.isChecked } : task
-  );
-  saveTaskInBrowser();
+const updateTask = async (updateTask) => {
+  const url = `${BASE_URL}/${updateTask.id}`;
+  const taskToUpdateJson = JSON.stringify(updateTask);
+  const response = await fetch (url, {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json' }, 
+    body: taskToUpdateJson
+  });
+  const updatedTask = await response.json();
+  createNotification({
+    titles: 'Tarea Actualizada',
+    description: ``,
+    type:'success'
+  });
+  tasks = tasks.map(task => {
+    if (task.id === updatedTask.id) {
+      return updatedTask;      
+    } else {
+      return task;
+    }
+  });
+  updateCounters();
 }
 
 export {
@@ -128,6 +201,7 @@ export {
   renderTasks,
   saveTaskInBrowser,
   getTasksFromBrowser,
+  getTaskFromDb,
   removeTask,
   updateTask,
   checkIcon,

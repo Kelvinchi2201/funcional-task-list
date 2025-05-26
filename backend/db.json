@@ -1,0 +1,19 @@
+{
+  "tasks": [
+    {
+      "id": "ac0ed72b-7475-46f8-8c63-d3d2f39180c8",
+      "Task": "barrer",
+      "isChecked": false
+    },
+    {
+      "id": "c4164ba5-7bc9-4ef9-8dac-7e5621ce79a8",
+      "Task": "comprar",
+      "isChecked": false
+    },
+    {
+      "id": "d98f38e1-322e-411c-bdd6-2d536fb76487",
+      "Task": "limpiar la casa",
+      "isChecked": true
+    }
+  ]
+}
