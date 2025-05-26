@@ -28,7 +28,7 @@ let tasks = [];
     });
     const taskToCreated = await response.json();
     tasks = tasks.concat(taskToCreated);
-    updateCounters();
+    
     createNotification({
       titles: 'Nueva tarea creada',
       description: '',
